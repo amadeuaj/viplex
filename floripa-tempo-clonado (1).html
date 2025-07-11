@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') no-repeat center center;
+      background-size: cover;
+    }
+
+    .weather {
+      text-align: center;
+      padding: 40px 20px;
+      background-color: rgba(0, 0, 0, 0.4);
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .temp {
+      font-size: 60px;
+      margin: 20px 0 10px;
+    }
+
+    .condition {
+      font-size: 24px;
+      text-transform: capitalize;
+    }
+
+    .info {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+      font-size: 16px;
+    }
+
+    .info div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="weather">
+    <div id="city">Carregando...</div>
+    <div class="temp" id="temp"></div>
+    <div class="condition" id="condition"></div>
+    <div class="info">
+      <div>
+        <div class="label">Mín / Máx</div>
+        <div id="minmax"></div>
+      </div>
+      <div>
+        <div class="label">Vento</div>
+        <div id="wind"></div>
+      </div>
+      <div>
+        <div class="label">Umidade</div>
+        <div id="humidity"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "0c31a97b249395570c8e03d7dfc1d8f3";
+    const city = "Florianópolis, BR";
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=pt_br`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("city").innerText = `${data.name}, ${data.sys.country}`;
+        document.getElementById("temp").innerText = `${Math.round(data.main.temp)}°C`;
+        document.getElementById("condition").innerText = data.weather[0].description;
+        document.getElementById("minmax").innerText = `${Math.round(data.main.temp_min)}° / ${Math.round(data.main.temp_max)}°`;
+        document.getElementById("wind").innerText = `${Math.round(data.wind.speed * 3.6)} km/h`;
+        document.getElementById("humidity").innerText = `${data.main.humidity}%`;
+      })
+      .catch(error => {
+        document.getElementById("city").innerText = "Erro ao carregar clima";
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
