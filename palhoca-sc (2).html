@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Clima e Hora</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: white;
+      width: 384px; height: 384px; overflow: hidden;
+      background-size: cover; background-position: center; background-repeat: no-repeat; }
+    .weather { text-align: center; padding: 40px 20px;
+      background-color: rgba(0, 0, 0, 0.4); height: 100%;
+      box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; }
+    #clock { font-size: 32px; margin-bottom: 20px; }
+    .temp { font-size: 60px; margin: 10px 0; }
+    .condition { font-size: 24px; text-transform: capitalize; }
+    .info { display: flex; justify-content: center; gap: 30px; margin-top: 30px; font-size: 16px; }
+    .info div { display: flex; flex-direction: column; align-items: center; }
+    .label { font-size: 14px; opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <div class="weather">
+    <div id="clock">--:--</div>
+    <div id="city">Carregando...</div>
+    <div class="temp" id="temp"></div>
+    <div class="condition" id="condition"></div>
+    <div class="info">
+      <div><div class="label">Mín / Máx</div><div id="minmax"></div></div>
+      <div><div class="label">Vento</div><div id="wind"></div></div>
+      <div><div class="label">Umidade</div><div id="humidity"></div></div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "c8c70c1d61bc68b2148356979f336041";
+    const city = "Palhoça, BR";
+
+    function getBackgroundByWeatherId(id, isDay) {
+      if (id >= 200 && id < 300) return "https://images.unsplash.com/photo-1429552077091-836152271555";
+      if (id >= 300 && id < 400) return "https://images.unsplash.com/photo-1618589619111-5b932c02a2cc";
+      if (id >= 500 && id < 600) return "https://images.unsplash.com/photo-1652284536566-7a744a89f105";
+      if (id >= 600 && id < 700) return "https://images.unsplash.com/photo-1701198067277-a81305704acc";
+      if (id >= 700 && id < 800) return "https://images.unsplash.com/photo-1574619151098-b0cc6becf073";
+      if (id === 800) return isDay
+        ? "https://plus.unsplash.com/premium_photo-1677105700661-dbfad22793ca"
+        : "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f";
+      if (id === 801) return isDay
+        ? "https://images.unsplash.com/photo-1717446586299-41283dbe7e87"
+        : "https://images.unsplash.com/photo-1519681393784-d120267933ba";
+      if (id === 802) return "https://images.unsplash.com/photo-1545099905-e079c75b423f";
+      if (id === 803 || id === 804) return "https://images.unsplash.com/photo-1708552592233-5934a64eaec0";
+      return "https://plus.unsplash.com/premium_photo-1667689956673-8737a299aa8c";
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById("clock").innerText = `${hours}:${minutes}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=pt_br`)
+      .then(response => response.json())
+      .then(data => {
+        const now = Math.floor(Date.now() / 1000);
+        const sunrise = data.sys.sunrise;
+        const sunset = data.sys.sunset;
+        const isDay = now >= sunrise && now < sunset;
+
+        const id = data.weather[0].id;
+        const bg = getBackgroundByWeatherId(id, isDay);
+        document.body.style.backgroundImage = `url('${bg}')`;
+
+        document.getElementById("city").innerText = `${data.name}, ${data.sys.country}`;
+        document.getElementById("temp").innerText = `${Math.round(data.main.temp)}°C`;
+        document.getElementById("condition").innerText = data.weather[0].description;
+        document.getElementById("minmax").innerText = `${Math.round(data.main.temp_min)}° / ${Math.round(data.main.temp_max)}°`;
+        document.getElementById("wind").innerText = `${Math.round(data.wind.speed * 3.6)} km/h`;
+        document.getElementById("humidity").innerText = `${data.main.humidity}%`;
+      })
+      .catch(error => {
+        document.getElementById("city").innerText = "Erro ao carregar clima";
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
